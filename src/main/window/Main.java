@@ -2,6 +2,7 @@ package main.window;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -52,7 +53,7 @@ public class Main extends Application {
         menuBar.getMenus().add(optionsMenu);   // Inject optionsMenu into MenuBar
 
 
-        javafx.event.EventHandler<ActionEvent> MenuEventHandler = new javafx.event.EventHandler<ActionEvent>() {
+        EventHandler<ActionEvent> MenuEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent ae) {
                 String chosenOption = ((MenuItem) ae.getTarget()).getText();
                 if (chosenOption.equals("Exit")) {
