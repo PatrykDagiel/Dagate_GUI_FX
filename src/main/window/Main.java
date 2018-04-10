@@ -1,13 +1,16 @@
 package main.window;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.event.ActionEvent;
+
 import telnet.sockets.TelnetClient;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class Main extends Application {
 
@@ -25,10 +28,71 @@ public class Main extends Application {
         telnet_Client = new TelnetClient();
         telnet_Client.execute(telnet_Output);
 
-        FlowPane rootNode = new FlowPane();
+        BorderPane rootNode = new BorderPane();
         primaryStage.setTitle("Dagate_GUI");
         primaryStage.setScene(new Scene(rootNode, 500, 375));
         rootNode.getChildren().add(telnet_Output);
+
+        //Menu Bar addition
+        MenuBar menuBar = new MenuBar();
+
+        //Menu Bar "File" tab creation
+        Menu fileMenu = new Menu("File");
+        MenuItem import_lua = new MenuItem("Import LUA Configuration");
+        MenuItem exit = new MenuItem("Exit");
+        fileMenu.getItems().addAll(import_lua, new SeparatorMenuItem(), exit);     // Separator - increases readability
+        menuBar.getMenus().add(fileMenu);   // Inject fileMenu into MenuBar
+
+        //Menu Bar "Options" tab creation
+        Menu optionsMenu = new Menu("Options");
+        MenuItem option_setup_egate = new MenuItem("Setup EGate connections");
+        MenuItem option_close_egate = new MenuItem("Close egate and edaemon");
+        MenuItem option_start_KPI = new MenuItem("Start KPI listeners");
+        optionsMenu.getItems().addAll(option_setup_egate, option_close_egate, option_start_KPI);
+        menuBar.getMenus().add(optionsMenu);   // Inject optionsMenu into MenuBar
+
+
+        javafx.event.EventHandler<ActionEvent> MenuEventHandler = new javafx.event.EventHandler<ActionEvent>() {
+            public void handle(ActionEvent ae) {
+                String chosenOption = ((MenuItem) ae.getTarget()).getText();
+                if (chosenOption.equals("Exit")) {
+                    Platform.exit();
+                } else if (chosenOption.equals("Setup Egate connections")) {
+                    String[] commands = {"/bin/bash", "-c", "sudo ./edaemon --port 10000 && sudo ./edaemon --port 30000 && sleep 1"};
+                    String[] command_2 = {"/bin/bash", "-c", "sudo ./edaemon --port 30000"};
+                    String[] command_3 = {"/bin/bash", "-c", "sudo sleep 1"};
+                    Process p, p2;
+                    try {
+                        p = Runtime.getRuntime().exec(commands);
+                        p2 = Runtime.getRuntime().exec(command_2);
+                        p = Runtime.getRuntime().exec(command_3);
+                        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));
+                        p.waitFor();
+                        p2.waitFor();
+                        String line = null;
+                        System.out.println("Executing command : ");
+                        while ((line = stdInput.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                        p.destroy();
+                        p2.destroy();
+                    } catch (Exception e) {
+                        System.out.println("Badziewie IO Exception " + e);
+                    }
+                } else {
+                    System.out.printf("Dummy endpoint\n");
+                }
+            }
+        };
+
+        // Setup listeners action properly for each option
+        import_lua.setOnAction(MenuEventHandler);
+        exit.setOnAction(MenuEventHandler);
+        option_setup_egate.setOnAction(MenuEventHandler);
+        option_close_egate.setOnAction(MenuEventHandler);
+        option_start_KPI.setOnAction(MenuEventHandler);
+
+        rootNode.setTop(menuBar);
 
         primaryStage.show();
 
@@ -46,115 +110,3 @@ public class Main extends Application {
     }
 }
 
-//public class main_form implements ActionListener {
-//
-//    private JLabel jlab;
-//    public JTextArea testOutput;
-//
-//    public main_form() {
-//
-//        JFrame jfrm = new JFrame("Egate GUI");
-//        jfrm.setSize(400,400);
-//        jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//        jlab = new JLabel();
-//        testOutput = new JTextArea(10,10);
-//
-//        JMenuBar jmb = new JMenuBar();
-//
-//        // Zakladka Plik w pasku menu
-//        JMenu jmFile = new JMenu("File");
-//        JMenuItem item_1 = new JMenuItem("Import LUA File");
-//        JMenuItem item_2 = new JMenuItem("Close EGate GUI");
-//        jmFile.add(item_1);
-//        jmFile.add(item_2);
-//        jmb.add(jmFile);
-//
-//        // Zakladka opcji w pasku menu
-//        JMenu jmOptions = new JMenu("Options");
-//        JMenuItem item_o_revive = new JMenuItem("Setup EGate connections");
-//        JMenuItem item_o_2 = new JMenuItem("Close EGate connections");
-//        JMenuItem item_o_3 = new JMenuItem("Start KPI gathering");
-//        jmOptions.add(item_o_revive);
-//        jmOptions.add(item_o_2);
-//        jmOptions.add(item_o_3);
-//        jmb.add(jmOptions);
-//
-//        jfrm.add(jlab);
-//        jfrm.add(testOutput);
-//
-//        item_1.addActionListener(this);
-//        item_2.addActionListener(this);
-//        item_o_revive.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                String[] commands = {"/bin/bash", "-c", "sudo ./edaemon --port 10000 && sudo ./edaemon --port 30000 && sleep 1"};
-//                String[] command_2 = {"/bin/bash", "-c", "sudo ./edaemon --port 30000"};
-//                String[] command_3 = {"/bin/bash", "-c", "sudo sleep 1"};
-//                Process p, p2;
-////                try {
-////                    // Proba wykonania komendy revive_all [postawienie daemonow egate, portów itd]
-//////                    p = Runtime.getRuntime().exec("sudo ./edaemon --port 10000 && sudo ./edaemon --port 30000 && ./egate --port 20000 && sleep 1 && telnet 0 20000");
-////
-////                    p = Runtime.getRuntime().exec(commands);
-////                    p2 = Runtime.getRuntime().exec(command_2);
-////                    p = Runtime.getRuntime().exec(command_3);
-////                    BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));
-////                    p.waitFor();
-////                    p2.waitFor();
-////                    String line = null;
-////                    System.out.println("Executing command : ");
-////                    while((line = stdInput.readLine()) != null) {
-////                        System.out.println(line);
-////                    }
-////                    p.destroy();
-////                    p2.destroy();
-////
-//////                    TelnetClient polaczenie_testowe = new TelnetClient();
-//////                    polaczenie_testowe.execute(testOutput);
-////
-////
-////                } catch (Exception x) {
-////                    System.out.println("To jest badziewie " + x);
-////                }
-//
-//                try {
-//                    TelnetClient polaczenie_testowe = new TelnetClient();
-//                    polaczenie_testowe.execute(testOutput);
-//                } catch (Exception x) {
-//                    System.out.println("Blad bloku try dla Socketa " + x);
-//                }
-//
-//
-//            }
-//        });
-//        item_o_2.addActionListener(this);
-//        item_o_3.addActionListener(this);
-//
-//        jfrm.setJMenuBar(jmb);jfrm.setVisible(true);
-//
-//    }
-//
-//
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                new main_form();
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void actionPerformed(ActionEvent e) {
-//        String option = e.getActionCommand();
-//        if(option.equals("Close EGate GUI")){
-//            System.exit(0);
-//        }
-//        jlab.setText("The option chosen is " + option);
-//
-//    }
-//
-//
-//
-//}
