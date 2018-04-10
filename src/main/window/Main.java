@@ -9,14 +9,24 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     @Override
+    public void init() throws Exception {
+        super.init();
+        System.out.printf("Inside init method");
+    }
+
+    @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Dagate_GUI");
         primaryStage.setScene(new Scene(root, 500, 375));
         primaryStage.show();
     }
 
-
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        System.out.println("Inside stop method");
+    }
 
 
     public static void main(String[] args) {

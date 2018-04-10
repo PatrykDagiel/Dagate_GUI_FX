@@ -1,5 +1,7 @@
 package telnet.sockets;
 
+import javafx.scene.control.Label;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +14,7 @@ public class TelnetClient {
     private PrintWriter out = null;
     private BufferedReader in = null;
 
-    public void execute(JTextArea testOutput) throws IOException {
+    public void execute(Label testOutput) throws IOException {
         try {
             pingSocket = new Socket("0.0.0.0", 20000);
             out = new PrintWriter(pingSocket.getOutputStream(), true);
