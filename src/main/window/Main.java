@@ -4,9 +4,14 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import telnet.sockets.TelnetClient;
 
 public class Main extends Application {
+
+    private static TelnetClient telnet_Client;
 
     @Override
     public void init() throws Exception {
@@ -16,10 +21,17 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        Label telnet_Output = new Label();
+        telnet_Client = new TelnetClient();
+        telnet_Client.execute(telnet_Output);
+
+        FlowPane rootNode = new FlowPane();
         primaryStage.setTitle("Dagate_GUI");
-        primaryStage.setScene(new Scene(root, 500, 375));
+        primaryStage.setScene(new Scene(rootNode, 500, 375));
+        rootNode.getChildren().add(telnet_Output);
+
         primaryStage.show();
+
     }
 
     @Override
