@@ -6,16 +6,19 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
 import telnet.sockets.TelnetClient;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
 
-    private static TelnetClient telnet_Client;
+    private TelnetClient telnet_Client;
 
     @Override
     public void init() throws Exception {
@@ -25,14 +28,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Label telnet_Output = new Label();
-        telnet_Client = new TelnetClient();
-        telnet_Client.execute(telnet_Output);
+        TextArea telnet_Output = new TextArea();
 
         BorderPane rootNode = new BorderPane();
         primaryStage.setTitle("Dagate_GUI");
         primaryStage.setScene(new Scene(rootNode, 500, 375));
-        rootNode.getChildren().add(telnet_Output);
+//        rootNode.getChildren().add(telnet_Output);
 
         //Menu Bar addition
         MenuBar menuBar = new MenuBar();
@@ -58,27 +59,38 @@ public class Main extends Application {
                 String chosenOption = ((MenuItem) ae.getTarget()).getText();
                 if (chosenOption.equals("Exit")) {
                     Platform.exit();
-                } else if (chosenOption.equals("Setup Egate connections")) {
-                    String[] commands = {"/bin/bash", "-c", "sudo ./edaemon --port 10000 && sudo ./edaemon --port 30000 && sleep 1"};
-                    String[] command_2 = {"/bin/bash", "-c", "sudo ./edaemon --port 30000"};
-                    String[] command_3 = {"/bin/bash", "-c", "sudo sleep 1"};
-                    Process p, p2;
+                } else if (chosenOption.equals("Setup EGate connections")) {
+
+                    String[][] commands = {{"/bin/bash", "-c", "sudo ./edaemon --port 10000"},
+                            {"/bin/bash", "-c", "sudo ./edaemon --port 30000"},
+                            {"/bin/bash", "-c", "./egate --port 20000"}};
+                    Process process_Handler;
                     try {
-                        p = Runtime.getRuntime().exec(commands);
-                        p2 = Runtime.getRuntime().exec(command_2);
-                        p = Runtime.getRuntime().exec(command_3);
-                        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p2.getInputStream()));
-                        p.waitFor();
-                        p2.waitFor();
-                        String line = null;
-                        System.out.println("Executing command : ");
-                        while ((line = stdInput.readLine()) != null) {
-                            System.out.println(line);
+                        for (String[] x : commands) {
+                            process_Handler = Runtime.getRuntime().exec(x);
+                            TimeUnit.SECONDS.sleep(7);
+                            if (process_Handler.isAlive()) {
+                                System.out.println("Process is alive");
+                            }
+                            BufferedReader stdInput = new BufferedReader(new InputStreamReader(process_Handler.getInputStream()));
+                            String line = null;
+                            System.out.println("Executing command : ");
+                            while ((line = stdInput.readLine()) != null) {
+                                System.out.println(line);
+                            }
+                            process_Handler.waitFor();
+                            System.out.println("Logging process closure");
+                            process_Handler.destroy();
                         }
-                        p.destroy();
-                        p2.destroy();
                     } catch (Exception e) {
                         System.out.println("Badziewie IO Exception " + e);
+                    } try {
+                        System.out.println("Inside Telnet connection");
+                        telnet_Client = new TelnetClient();
+                        System.out.println("Inside Telnet connection_2");
+                        telnet_Client.execute(telnet_Output);
+                    } catch (IOException e) {
+                        System.out.println("IO Exception with output Text Area");
                     }
                 } else {
                     System.out.printf("Dummy endpoint\n");
@@ -94,6 +106,7 @@ public class Main extends Application {
         option_start_KPI.setOnAction(MenuEventHandler);
 
         rootNode.setTop(menuBar);
+        rootNode.setCenter(telnet_Output);
 
         primaryStage.show();
 
