@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class TelnetClient {
@@ -20,13 +22,14 @@ public class TelnetClient {
         try {
             testOutput.appendText("Initial text inside area");
             System.out.println("Checkpoint_1");
-            pingSocket = new Socket("0.0.0.0", 20000);
+            pingSocket = new Socket(InetAddress.getLocalHost(), 20000);
             out = new PrintWriter(pingSocket.getOutputStream(), false);
             in = new BufferedReader(new InputStreamReader(pingSocket.getInputStream()));
             String linia = null;
             System.out.println("Checkpoint_2");
             while((linia = in.readLine()) != null) {
                 testOutput.appendText(linia);
+                System.out.printf("Dzieje sie badziewie " + linia);
             }
             System.out.println("Checkpoint_3");
         } catch(Exception dramat) {

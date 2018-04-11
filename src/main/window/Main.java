@@ -68,7 +68,7 @@ public class Main extends Application {
                     try {
                         for (String[] x : commands) {
                             process_Handler = Runtime.getRuntime().exec(x);
-                            TimeUnit.SECONDS.sleep(7);
+                            TimeUnit.SECONDS.sleep(3);
                             if (process_Handler.isAlive()) {
                                 System.out.println("Process is alive");
                             }
