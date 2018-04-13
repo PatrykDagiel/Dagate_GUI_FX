@@ -10,7 +10,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
-import telnet.sockets.TelnetClient;
+import telnet.sockets.EgateClient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
 
-    private TelnetClient telnet_Client;
+    private EgateClient egate_Client = null;
 
     @Override
     public void init() throws Exception {
@@ -86,9 +86,8 @@ public class Main extends Application {
                         System.out.println("Badziewie IO Exception " + e);
                     } try {
                         System.out.println("Inside Telnet connection");
-                        telnet_Client = new TelnetClient();
-                        System.out.println("Inside Telnet connection_2");
-                        telnet_Client.execute(telnet_Output);
+                        egate_Client = new EgateClient();
+                        egate_Client.execute(telnet_Output);
                     } catch (IOException e) {
                         System.out.println("IO Exception with output Text Area");
                     }
