@@ -11,6 +11,8 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
 import telnet.sockets.EgateClient;
+
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,46 +56,43 @@ public class Main extends Application {
         menuBar.getMenus().add(optionsMenu);   // Inject optionsMenu into MenuBar
 
 
-        EventHandler<ActionEvent> MenuEventHandler = new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent ae) {
-                String chosenOption = ((MenuItem) ae.getTarget()).getText();
-                if (chosenOption.equals("Exit")) {
-                    Platform.exit();
-                } else if (chosenOption.equals("Setup EGate connections")) {
-
-                    String[][] commands = {{"/bin/bash", "-c", "sudo ./edaemon --port 10000"},
-                            {"/bin/bash", "-c", "sudo ./edaemon --port 30000"},
-                            {"/bin/bash", "-c", "./egate --port 20000"}};
-                    Process process_Handler;
-                    try {
-                        for (String[] x : commands) {
-                            process_Handler = Runtime.getRuntime().exec(x);
-                            TimeUnit.SECONDS.sleep(3);
-                            if (process_Handler.isAlive()) {
-                                System.out.println("Process is alive");
-                            }
-                            BufferedReader stdInput = new BufferedReader(new InputStreamReader(process_Handler.getInputStream()));
-                            String line = null;
-                            System.out.println("Executing command : ");
-                            while ((line = stdInput.readLine()) != null) {
-                                System.out.println(line);
-                            }
-                            process_Handler.waitFor();
-                            System.out.println("Logging process closure");
-                            process_Handler.destroy();
+        EventHandler<ActionEvent> MenuEventHandler = ae -> {
+            String chosenOption = ((MenuItem) ae.getTarget()).getText();
+            if (chosenOption.equals("Exit")) {
+                Platform.exit();
+            } else if (chosenOption.equals("Setup EGate connections")) {
+                egate_Client = new EgateClient(telnet_Output);
+                String[][] commands = {{"/bin/bash", "-c", "sudo ./edaemon --port 10000"},
+                        {"/bin/bash", "-c", "sudo ./edaemon --port 30000"},
+                        {"/bin/bash", "-c", "./egate --port 20000"}};
+                Process process_Handler;
+                try {
+                    for (String[] x : commands) {
+                        process_Handler = Runtime.getRuntime().exec(x);
+                        TimeUnit.SECONDS.sleep(3);
+                        if (process_Handler.isAlive()) {
+                            System.out.println("Process is alive");
                         }
-                    } catch (Exception e) {
-                        System.out.println("Badziewie IO Exception " + e);
-                    } try {
-                        System.out.println("Inside Telnet connection");
-                        egate_Client = new EgateClient();
-                        egate_Client.execute(telnet_Output);
-                    } catch (IOException e) {
-                        System.out.println("IO Exception with output Text Area");
+                        BufferedReader stdInput = new BufferedReader(new InputStreamReader(process_Handler.getInputStream()));
+                        String line = null;
+                        System.out.println("Executing command : ");
+                        while ((line = stdInput.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                        process_Handler.waitFor();
+                        System.out.println("Logging process closure");
+                        process_Handler.destroy();
                     }
-                } else {
-                    System.out.printf("Dummy endpoint\n");
+                } catch (Exception e) {
+                    System.out.println("Badziewie IO Exception " + e);
+                } try {
+                    System.out.println("Inside Telnet connection");
+                    egate_Client.connect_to_egate();
+                } catch (Exception e) {
+                    System.out.println("IO Exception with output Text Area");
                 }
+            } else {
+                System.out.printf("Dummy endpoint\n");
             }
         };
 
