@@ -61,7 +61,7 @@ public class Main extends Application {
             if (chosenOption.equals("Exit")) {
                 Platform.exit();
             } else if (chosenOption.equals("Setup EGate connections")) {
-                egate_Client = new EgateClient(telnet_Output);
+                egate_Client = new EgateClient();
                 String[][] commands = {{"/bin/bash", "-c", "sudo ./edaemon --port 10000"},
                         {"/bin/bash", "-c", "sudo ./edaemon --port 30000"},
                         {"/bin/bash", "-c", "./egate --port 20000"}};
@@ -88,6 +88,8 @@ public class Main extends Application {
                 } try {
                     System.out.println("Inside Telnet connection");
                     egate_Client.connect_to_egate();
+                    egate_Client.write_message_to_egate("TOMASZ HAJTO TEST 01010101010101");
+                    egate_Client.close_connection_to_egate();
                 } catch (Exception e) {
                     System.out.println("IO Exception with output Text Area");
                 }
