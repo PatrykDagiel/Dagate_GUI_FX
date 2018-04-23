@@ -32,7 +32,7 @@ public class EgateClient implements Runnable {
     }
 
     public void write_message_to_egate(String message) {
-
+        
     }
 
     public static void read_message_from_egate(InputStream input) throws IOException {

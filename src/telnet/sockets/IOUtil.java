@@ -63,8 +63,7 @@ public final class IOUtil
                              //e.printStackTrace();
                          }
                      }
-                 }
-                 ;
+                 };
 
 
         writer = new Thread()
